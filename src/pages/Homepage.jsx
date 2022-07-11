@@ -1,16 +1,13 @@
-import Navbar from "../components/navbar"
-import Sidebar from "../components/Sidebar";
- 
+import Sidebar from "../Components/Sidebar";
 
-const Homepage = () => {
+const HomePage = () => {
     return ( 
         <div>
-            <Navbar></Navbar>
             <div className="flex flex-row pt-16">
                 <Sidebar></Sidebar>
             </div>
         </div>
     );
 }
-export default Homepage;
-
+ 
+export default HomePage;

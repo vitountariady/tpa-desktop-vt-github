@@ -11,7 +11,6 @@ const UserContext = createContext();
 export const AuthContextProvider = ({children})=>{
     const [user,setUser] = useState({});
     const [userData, setUserData] = useState({});
-    const navigate= useNavigate();
     const location = useLocation();
 
     useEffect(()=>{
@@ -22,7 +21,6 @@ export const AuthContextProvider = ({children})=>{
             }else{
                 return;
             }
-
             getData= onSnapshot(doc(db,'users',curr.uid),(s)=>{
                 setUserData(s.data());
             });
@@ -34,7 +32,7 @@ export const AuthContextProvider = ({children})=>{
 
 
     return(
-        <UserContext.Provider value={{user,userData,navigate}}>
+        <UserContext.Provider value={{user,userData}}>
             {children}
         </UserContext.Provider>
     );

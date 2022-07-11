@@ -1,12 +1,13 @@
-import Register from "./components/register-form";
-import Login from "./components/login-form";
 import { Routes,Route,Outlet } from "react-router-dom";
-import  Homepage from "./pages/Homepage";
-import WorkspacePage from "./pages/WorkspacePage";
-import BoardPage from "./components/BoardPage";
-import InviteLinkPage from "./pages/InviteLinkPage";
 import ProtectedRoute from "./context/Middleware";
 import { AuthContextProvider } from "./context/AuthContext";
+import LoginPage from "./Pages/loginPage";
+import RegisterPage from "./Pages/registerPage";
+import HomePage from "./Pages/homePage";
+import InviteLink from "./Pages/inviteLinkPage";
+import WorkspacePage from "./Pages/workspacePage";
+import BoardInvite from "./Pages/boardInvite";
+import ClosedBoardsPage from "./Pages/ClosedBoardsPage";
 
 const Protect =()=>{
   return(
@@ -20,14 +21,13 @@ export default function App() {
   return (
     <AuthContextProvider>
       <Routes>
-          <Route path="/register" element={<Register/>} />
-          <Route exact path="/" element={<Login/>}/>
-        <Route element={<Protect/>}>
-          <Route exact path="/home" element={<Homepage/>}/>
-          <Route exact path="/:workspaceid" element={<WorkspacePage/>}/>
-          <Route exact path="/:workspaceid/:boardid" element={<BoardPage/>}/>
-          <Route exact path="/invitelink/:workspaceid" element={<InviteLinkPage/>}/>
-        </Route>
+          <Route exact path="/" element={<LoginPage></LoginPage>}/>
+          <Route exact path="/register" element={<RegisterPage></RegisterPage>}/>
+          <Route exact path="/home" element={<HomePage></HomePage>}/>
+          <Route exact path="/workspaceinvite/:workspaceid" element={<InviteLink></InviteLink>}/>
+          <Route exact path="/boardinvite/:boardid" element={<BoardInvite></BoardInvite>}/>
+          <Route exact path="/:workspaceid" element={<WorkspacePage></WorkspacePage>}/>
+          <Route exact path="/closedboards" element={<ClosedBoardsPage></ClosedBoardsPage>}/>
       </Routes>
     </AuthContextProvider>
   )

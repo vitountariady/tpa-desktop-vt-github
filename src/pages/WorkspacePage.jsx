@@ -1,38 +1,56 @@
-import { collection, onSnapshot, query} from "firebase/firestore";
-import { useEffect } from "react";
-import { useState } from "react";
 import { useParams } from "react-router-dom";
-import Navbar from "../components/navbar";
-import Sidebar from "../components/Sidebar";
-import Workspace from "../components/Workspace";
+import Sidebar from "../Components/Sidebar";
+import { PlusIcon as PlusIconSolid } from '@heroicons/react/solid'
+import { collection, doc, getDoc, getDocs, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "../firebase.config";
+import { useEffect, useState } from "react";
+import CreateBoardModal from "../Components/CreateBoard";
+import Board from "../Components/Board";
+
 
 const WorkspacePage = () => {
-    const [boards, setboards] = useState([]);
     const params = useParams();
+    const [Modal, setModal] = useState(false);
+    const [Boards, setBoards] = useState([]);
 
-    
-    useEffect(()=>{
-        const q = query(collection(db,'workspace',params.workspaceid,'board'));
-        onSnapshot(q,(docs)=>{
-            let array=[];
-            docs.forEach(doc=>{
-                console.log(doc.data());
-                array.push({...doc.data(), id:doc.id});
-            });
-            setboards(array);
-        });
-    },[params]);
+    useEffect(() => {
+        const q = query(collection(db,'board'),where("WorkspaceID","==",params.workspaceid));
+        onSnapshot(q,(snap)=>{
+            setBoards(snap.docs);
+        })
+    }, [params.workspaceid])
+
+
+    const toggleModal = () =>{
+        setModal(!Modal);
+    }
 
     return ( 
         <div>
-            <Navbar></Navbar>
+            {Modal && (
+                <CreateBoardModal workspaceid={params.workspaceid} toggle={toggleModal} ></CreateBoardModal>
+            )}
             <div className="flex flex-row pt-16">
                 <Sidebar></Sidebar>
-                <Workspace workspaceid ={params.workspaceid} array={boards}></Workspace>
+                <div className="flex flex-row overflow-x-scroll">
+                    <div onClick={toggleModal} className='m-5 bg-neutral-300 hover:bg-neutral-200 active:bg-neutral-400 w-56 h-40 rounded-md flex flex-col justify-center items-center'>
+                        <div id='lingkaran' className='h-6 w-6 border-2 border-black p2 rounded-full flex justify-center items-center'>
+                            <PlusIconSolid className="h-3 w-3" aria-hidden="true" />
+                        </div>
+                        <p>Create Board</p>
+                    </div>  
+                    {Boards.map((curr)=>{
+                        if(!curr.data().Open){
+                            return;
+                        }
+                        return(
+                            <Board board={curr}></Board>
+                        )
+                    })} 
+                </div>
             </div>
         </div>
-     );
+    );
 }
  
 export default WorkspacePage;

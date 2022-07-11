@@ -1,39 +1,38 @@
-import { PlusIcon as PlusIconSolid } from '@heroicons/react/solid'
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import BoardModal from './BoardModal';
-const Workspace = (props) => {
-    const [boardModal,setBoardModal] = useState(false);
-    const boardlist = props.array;
-    function ToggleBoardModal(){
-        setBoardModal(!boardModal);
+import { Cog } from "heroicons-react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { UserAuth } from "../context/AuthContext";
+import WorkspaceSettingModal from "./WorkspaceSettingModal";
+
+const Workspace = (parameter) => {
+    const loggedIn = UserAuth();
+    const [Modal, setModal] = useState(false);
+
+    const toggleModal = ()=>{
+        setModal(!Modal);
     }
 
     useEffect(() => {
-        if(boardModal === true){
+        if(Modal === true){
             document.body.style.overflow="hidden";
         }else{
             document.body.style.overflow = "visible"
         }
-    }, [boardModal])
+    }, [Modal])
+
+    if(!parameter.workspace.data().members.includes(loggedIn.user.uid) && !parameter.workspace.data().Public){
+        return;
+    }
 
     return ( 
-        <div style={{width:"screen - 56"}} className="flex h-screen">
-            {boardModal && <BoardModal workspaceid={props.workspaceid} close={ToggleBoardModal} ></BoardModal>}
-            {boardlist.map((board)=>{
-                return(
-                    <Link to={"/"+props.workspaceid+"/"+board.id} className='m-5 bg-neutral-300 hover:bg-neutral-200 active:bg-neutral-400 w-56 h-40 rounded-md flex flex-col justify-center items-center'>
-                        <p className='text-xl text-center'>{board.BoardName}</p>
-                        <p className='text-sm opacity-70 text-center'>{board.Description}</p>
-                    </Link>
-                )
-            })}
-           <div onClick={ToggleBoardModal} className='m-5 bg-neutral-300 hover:bg-neutral-200 active:bg-neutral-400 w-56 h-40 rounded-md flex flex-col justify-center items-center'>
-                <div id='lingkaran' className='h-6 w-6 border-2 border-black p2 rounded-full flex justify-center items-center'>
-                    <PlusIconSolid className="h-3 w-3" aria-hidden="true" />
-                </div>
-                <p>Create Board</p>
-           </div>
+        <div key={parameter.workspace.data().id}className="flex flex-row h-25">
+            <Link to={"/"+parameter.workspace.id} className="w-[80%] p-2 h-25 bg-gray-700 hover:bg-gray-600 active:bg-gray-800 rounded-md flex justify-start items-center">
+                <p className="text-white">{parameter.workspace.data().WorkspaceName}</p>
+            </Link>
+            <div onClick={toggleModal} className="bg-gray-700 hover:bg-gray-600 h-15 w-10 active:bg-gray-800 rounded-lg flex justify-center items-center">
+                <Cog  className=" fill-white"></Cog>
+            </div>
+            {Modal && <WorkspaceSettingModal workspace = {parameter.workspace} toggle={toggleModal}></WorkspaceSettingModal>}
         </div>
      );
 }

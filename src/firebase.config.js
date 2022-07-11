@@ -6,12 +6,12 @@ import { getFirestore } from "firebase/firestore";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyDVXm7p-yMdWn9ulMTpL4q68JbBKLVgCiw",
-  authDomain: "tpa-desktop-vt.firebaseapp.com",
-  projectId: "tpa-desktop-vt",
-  storageBucket: "tpa-desktop-vt.appspot.com",
-  messagingSenderId: "991312247027",
-  appId: "1:991312247027:web:9a82a1251c2eba335a9f86"
+  apiKey: "AIzaSyBS4_S7H4ofiCf66GHJ2u0QIM_lOd64T54",
+    authDomain: "vito-tpa-desktop.firebaseapp.com",
+    projectId: "vito-tpa-desktop",
+    storageBucket: "vito-tpa-desktop.appspot.com",
+    messagingSenderId: "78559418003",
+    appId: "1:78559418003:web:afd06932809cf422dc1f66"
 };
 
 // Initialize Firebase

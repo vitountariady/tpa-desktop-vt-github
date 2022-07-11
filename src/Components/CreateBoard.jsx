@@ -1,22 +1,28 @@
 import { addDoc, collection } from "firebase/firestore";
+import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase.config";
 
-const BoardModal = (props) => {
-    function addBoard(e){
+const CreateBoardModal = (parameter) => {
+    const LoggedIn = UserAuth();
+
+    const addBoard=(e)=>{
         e.preventDefault();
         const visibility = e.target.public.checked;
         const workspacename = e.target.name.value;
         const description = e.target.desc.value
-        addDoc(collection(db,'workspace',props.workspaceid,'board'),{
-            BoardVisibility: visibility,
+        addDoc(collection(db,'board'),{
+            Public: visibility,
             BoardName: workspacename,
             Description: description,
+            admins: [LoggedIn.user.uid],
+            members: [LoggedIn.user.uid],
+            Open: true,
+            WorkspaceID: parameter.workspaceid
         }).catch((error)=>{
             console.log("ga masuk");
         });
-        props.close();
+        parameter.toggle();
     }
-
 
     return (
         <div style={{background:'rgba(0,0,0,0.5)'}} className="z-20 left-0 top-0 fixed flex w-full min-h-full justify-center items-center">
@@ -55,7 +61,7 @@ const BoardModal = (props) => {
                                 </button>
 
                                 <button
-                                    onClick={props.close}
+                                    onClick={parameter.toggle}
                                     className="group relative w-50 flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                                     <span className="absolute left-0 inset-y-0 flex items-center pl-3">
                                     </span>
@@ -68,4 +74,4 @@ const BoardModal = (props) => {
     );
 }
  
-export default BoardModal;
+export default CreateBoardModal;
