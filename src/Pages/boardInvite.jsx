@@ -35,7 +35,7 @@ const BoardInvite = () => {
                 <div className="mt-5 w-full">
                     <p className="text-xl text-center font-bold">You have been invited to join {Board.BoardName}</p>
                 </div>
-                <button onClick={acceptInvitation} className="mt-5 p-3 bg-blue-200 rounded-lg text-black hover:bg-blue-300 active:bg-blue-500 active:text-white">Join Workspace</button>
+                <button onClick={acceptInvitation} className="mt-5 p-3 bg-blue-200 rounded-lg text-black hover:bg-blue-300 active:bg-blue-500 active:text-white">Join Board</button>
             </div>
         </div>
     );

@@ -5,6 +5,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import Sidebar from "../Components/Sidebar";
 import { db } from "../firebase.config";
 import { UserAuth } from "../context/AuthContext";
+import Navbar from "../Components/Navbar";
 
 
 const ClosedBoardsPage = () => {
@@ -21,8 +22,8 @@ const ClosedBoardsPage = () => {
 
     return ( 
         <div>
+            <Navbar></Navbar>
             <div className="flex flex-row pt-16">
-                <Sidebar></Sidebar>
                 <div className="flex flex-row overflow-x-scroll">
                     {Boards.map((curr)=>{
                         console.log(curr.data());

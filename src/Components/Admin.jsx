@@ -6,7 +6,7 @@ const Admin = (parameter) => {
     const [Name, setName] = useState('');
     useEffect(() => {
         getDoc(doc(db,'users',parameter.admin)).then((document)=>{
-            setName(document.data().FirstName)
+            setName(document.data().FirstName + ' '+ document.data().LastName)
         });
     }, [parameter.admin])
     return(

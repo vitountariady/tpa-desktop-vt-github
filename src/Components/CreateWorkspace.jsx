@@ -14,7 +14,8 @@ const CreateWorkspaceModal = (parameter) => {
                 Public: visibility,
                 WorkspaceName: workspacename,
                 members: [loggedIn.user.uid],
-                admins: [loggedIn.user.uid]
+                admins: [loggedIn.user.uid],
+                Favorite: []
             }).catch((error)=>{
         });
         parameter.toggle();

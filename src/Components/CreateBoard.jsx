@@ -7,7 +7,7 @@ const CreateBoardModal = (parameter) => {
 
     const addBoard=(e)=>{
         e.preventDefault();
-        const visibility = e.target.public.checked;
+        const visibility = e.target.public.value;
         const workspacename = e.target.name.value;
         const description = e.target.desc.value
         addDoc(collection(db,'board'),{
@@ -44,11 +44,16 @@ const CreateBoardModal = (parameter) => {
                                 <textarea name="desc" id="desc" placeholder="Board Description" cols="30" rows="10" className="resize-none h-36 w-full p-3 border border-gray-300 placeholder-gray-500 rounded-lg focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10" ></textarea>
                             </div>
                             
-                            <div className="flex items-center pt-2 m-4">
-                                <input type="checkbox" name="public" id="public"  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
-                                <label htmlFor="public" className="ml-2 block text-sm text-gray-900">
-                                Make Board Public
+                            <div className="flex-col items-start space-y-2">
+                                <label htmlFor="public" className="block text-sm text-gray-900">
+                                    Board Visibility
                                 </label>
+                                <select name="public" id="public">
+                                    <option value="boardmember">Board Member Only</option>
+                                    <option value="workspacemember">Workspace Member Only</option>
+                                    <option value="public">Public</option>
+                                </select>
+                                {/* <input type="checkbox" name="public" id="public"  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" /> */}
                             </div>
 
                             <div className="flex justify-center pt-6 space-x-5">

@@ -9,7 +9,6 @@ import Workspace from './Workspace';
 
 
 const Sidebar = () => {
-    const navigate = useNavigate();
     const loggedIn = UserAuth();
     const [UserData, setUserData] = useState('user');
     const [Modal, setModal] = useState(false);
@@ -34,14 +33,10 @@ const Sidebar = () => {
 
 
     const getWorkspaceList = async() =>{
-        const q = query(collection(db, 'workspace'));
+        const q = query(collection(db, 'workspace'),where('members','array-contains',loggedIn.user.uid));
         onSnapshot(q,(documents)=>{
             setWorkspaceList(documents.docs);
         })
-    }
-
-    const openCloseBoards = () =>{
-        navigate('/closedboards');
     }
 
     return ( 
@@ -62,9 +57,6 @@ const Sidebar = () => {
                     <Workspace workspace ={curr}></Workspace>
                 );
             })}
-            <div className="mt-10 w-fit flex items-center justify-start rounded-lg hover:bg-gray-600 active:bg-gray-800">
-                <p onClick={openCloseBoards} className="p-1.5 text-white text-2xl">Closed Boards</p>
-            </div>
         </div>
      );
 }

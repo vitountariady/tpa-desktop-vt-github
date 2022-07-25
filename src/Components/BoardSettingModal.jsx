@@ -15,8 +15,8 @@ const BoardSetting = (parameter) => {
     const [Members, setMembers] = useState([]);
     const [link, setLink] = useState('');
     const [Admins, setAdmins] = useState([]);
-    const [Visibility, setVisibility] = useState('');
     const [Open, setOpen] = useState('');
+    const [Visibility, setVisibility] = useState('');
 
     useEffect(()=>{
         setMembers(parameter.board.data().members);
@@ -27,21 +27,12 @@ const BoardSetting = (parameter) => {
                 setIsOnlyAdmin(true);
             }
         }
+        setVisibility(parameter.board.data().Public);
     },[parameter.board])
 
     useEffect(()=>{
         if(IsAdmin===false){
             return;
-        }
-        let visibilityButton = document.getElementById("visibilityButton");
-        if(parameter.board.data().Public){
-            visibilityButton.classList.add("bg-green-500", "hover:bg-green-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-green-500");
-            visibilityButton.classList.remove("bg-red-500", "hover:bg-red-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-red-500");
-            setVisibility('Public')
-        }else{
-            visibilityButton.classList.add("bg-red-500", "hover:bg-red-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-red-500");
-            visibilityButton.classList.remove("bg-green-500", "hover:bg-green-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-green-500");
-            setVisibility('Private')
         }
         let openButton = document.getElementById("openButton");
         if(parameter.board.data().Open){
@@ -108,18 +99,18 @@ const BoardSetting = (parameter) => {
         }
         return false;
     }
+
+    const changeVisibility=()=>[
+        updateDoc(doc(db,'board',parameter.board.id),{
+            Public: document.getElementById("public").value
+        })
+    ]
     
     const toggleOpen = () =>{
         updateDoc(doc(db,'board',parameter.board.id),{
             Open: !parameter.board.data().Open
         })
     }
-    const togglePublic = () =>{
-        updateDoc(doc(db,'board',parameter.board.id),{
-            Public: !parameter.board.data().Public
-        })
-    }
-
 
     return(
         <div style={{background:'rgba(0,0,0,0.5)'}} className="fixed top-0 left-0 flex w-full min-h-full justify-center items-center">
@@ -150,9 +141,13 @@ const BoardSetting = (parameter) => {
                         <p className="text-2xl">Visibility</p>
                 )}
                 {IsAdmin && (
-                    <button onClick={togglePublic} id="visibilityButton" className="w-50 h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white">
-                        {Visibility}
-                    </button>
+                     <div className="flex-col items-start space-y-2">
+                        <select onClick={changeVisibility} name="public" id="public" defaultValue={Visibility}>
+                            <option id="boardmemberonly" value="boardmember">Board Member Only</option>
+                            <option id="workspacememberonly" value="workspacemember">Workspace Member Only</option>
+                            <option id="publiconly" value="public">Public</option>
+                        </select>
+                    </div>
                 )}
 
                 {IsAdmin && (
