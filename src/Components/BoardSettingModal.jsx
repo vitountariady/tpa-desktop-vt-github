@@ -1,10 +1,13 @@
-import { arrayRemove, arrayUnion, deleteDoc, doc, getDoc, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { isAdmin } from "@firebase/util";
+import { arrayRemove, arrayUnion, collection, deleteDoc, doc, getDoc, onSnapshot, query, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
+import { ExclamationCircle } from "heroicons-react";
 import { useEffect } from "react";
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase.config";
 import Admin from "./Admin";
+import BoardInviteModal from "./BoardInviteModal";
 import Member from "./Member";
 
 const BoardSetting = (parameter) => {
@@ -13,10 +16,15 @@ const BoardSetting = (parameter) => {
     const [IsAdmin, setIsAdmin] = useState(false);
     const [IsOnlyAdmin, setIsOnlyAdmin] = useState(false);
     const [Members, setMembers] = useState([]);
-    const [link, setLink] = useState('');
     const [Admins, setAdmins] = useState([]);
     const [Open, setOpen] = useState('');
     const [Visibility, setVisibility] = useState('');
+    const [ShowWarning, setShowWarning] = useState('');
+    const [InviteModal, setInviteModal] = useState(false);
+
+    const toggleInviteModal = () =>{
+        setInviteModal(!InviteModal);
+    }
 
     useEffect(()=>{
         setMembers(parameter.board.data().members);
@@ -26,48 +34,30 @@ const BoardSetting = (parameter) => {
             if(parameter.board.data().admins.length===1){
                 setIsOnlyAdmin(true);
             }
+        }else{
+            setIsAdmin(false);
+            setIsOnlyAdmin(false);
         }
         setVisibility(parameter.board.data().Public);
     },[parameter.board])
 
-    useEffect(()=>{
-        if(IsAdmin===false){
-            return;
-        }
-        let openButton = document.getElementById("openButton");
-        if(parameter.board.data().Open){
-            openButton.classList.add("bg-green-500", "hover:bg-green-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-green-500");
-            openButton.classList.remove("bg-red-500", "hover:bg-red-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-red-500");
-            setOpen('Open')
-        }else{
-            openButton.classList.add("bg-red-500", "hover:bg-red-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-red-500");
-            openButton.classList.remove("bg-green-500", "hover:bg-green-600", "focus:outline-none", "focus:ring-2", "focus:ring-offset-2","focus:ring-green-500");
-            setOpen('Close')
-        }
-    },[parameter.board.data()])
-
-    const makeLink = async ()=>{
-        setDoc(doc(db,'boardInvite',parameter.board.id),{
-            timestamp: serverTimestamp(),
-            boardID: parameter.board.id
-        })
-        setLink("localhost:3000/boardinvite/"+parameter.board.id)
-    }
-
-    const getLink =()=>{
-        const q = query(doc(db,'boardInvite',parameter.board.id));
-        getDoc(q).then((doc)=>{
-            if(doc.data()===undefined){
-                makeLink();
-            }else{
-                setLink("localhost:3000/boardinvite/"+doc.id)
+    const applyDelete = () =>{
+        updateDoc(doc(db,'board', parameter.board.id),{
+            remove: [LoggedIn.user.uid]
+        });
+        Admins.forEach((Admin)=>{
+            if(!self(Admin)){
+                updateDoc(doc(db,'notifications',Admin),{
+                    boarddelete:arrayUnion(parameter.board.id)
+                })
             }
         })
+        console.log("dah ke apply")
     }
 
     const deleteBoard = () =>{
         deleteDoc(doc(db,'board',parameter.board.id));
-       parameter.toggle();
+        parameter.toggle();
     }
 
     const demoteAdmin = (id) =>{
@@ -85,6 +75,9 @@ const BoardSetting = (parameter) => {
     const removeMember = (id)=>{
         if(Members.length===1){
             deleteBoard();
+        }else if(self(id)&&IsAdmin&&IsOnlyAdmin){
+            setShowWarning('Please Assign Admin Role to Another Member');
+            return;
         }else{
             updateDoc(doc(db,'board', parameter.board.id),{
                 members: arrayRemove(id),
@@ -108,9 +101,11 @@ const BoardSetting = (parameter) => {
     
     const toggleOpen = () =>{
         updateDoc(doc(db,'board',parameter.board.id),{
-            Open: !parameter.board.data().Open
+            Open: false
         })
+        parameter.toggle()
     }
+
 
     return(
         <div style={{background:'rgba(0,0,0,0.5)'}} className="fixed top-0 left-0 flex w-full min-h-full justify-center items-center">
@@ -122,20 +117,21 @@ const BoardSetting = (parameter) => {
                 <p className="text-2xl">Members</p>                     
                 {Admins.map((admin)=>{
                     return(
-                        <Admin IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} admin={admin} demoteAdmin={demoteAdmin} removeMember={removeMember}></Admin> 
+                        <Admin key={admin} IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} admin={admin} demoteAdmin={demoteAdmin} removeMember={removeMember}></Admin> 
                     )
                 })}
                 {Members.map((member)=>{
-                         if(Admins.includes(member)){
-                            return;
+                         if(!Admins.includes(member)){
+                             return(<Member key={member} IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} member={member} promoteMember={promoteMember} removeMember={removeMember}></Member>);
                         }
-                        return(<Member IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} member={member} promoteMember={promoteMember} removeMember={removeMember}></Member>);
                 })}
 
                 {IsAdmin && (
-                        <button onClick={getLink} className="h-10 pl-3 rounded-lg w-[18rem] bg-blue-500  hover:bg-blue-600 active:bg-blue-700 text-white">Generate Invite Link</button>
+                        <button onClick={toggleInviteModal} className="h-10 pl-3 rounded-lg w-[18rem] bg-blue-500  hover:bg-blue-600 active:bg-blue-700 text-white">Invite User to Board</button>
                         )}
-                    <p>{link}</p>
+                 {InviteModal && (
+                        <BoardInviteModal toggle={toggleInviteModal} board ={parameter.board}></BoardInviteModal>
+                    )}
 
                 {IsAdmin && (
                         <p className="text-2xl">Visibility</p>
@@ -149,24 +145,27 @@ const BoardSetting = (parameter) => {
                         </select>
                     </div>
                 )}
-
-                {IsAdmin && (
-                        <p className="text-2xl">Open</p>
-                )}
                     
                 {IsAdmin && (
-                        <button onClick={toggleOpen} id="openButton" className="w-50 h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white">
-                        {Open}
+                    <button onClick={toggleOpen} id="openButton" className="bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 w-50 h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white" >
+                        Close Board
                     </button>
                 )}
 
                 {IsAdmin && (
-                    <button onClick={deleteBoard} className="w-[18rem] h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                    <button onClick={applyDelete} className="w-[18rem] h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                         Delete Board
                     </button>
                 )}
+
+                {ShowWarning!=='' && (
+                    <div className="w-fit absolute top-1 left-[50%] translate-x-[-50%] py-2 px-4 h-fit bg-red-500 rounded-lg flex flex-row items-center justify-center space-x-2">
+                        <ExclamationCircle className="fill-white"></ExclamationCircle>
+                        <p className="text-white text-sm">{ShowWarning}</p>
+                    </div>
+                )}
             </div>
-            <div className="w-[38rem] pb-5 sticky bottom-0 flex flex-row-reverse">
+            <div className="w-[38rem] pb-5 bottom-0 flex flex-row-reverse">
                 <button
                     onClick={parameter.toggle}
                     className="flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">

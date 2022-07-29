@@ -5,16 +5,24 @@ import { db } from "../firebase.config";
 import {useNavigate} from "react-router-dom"
 import Member from "./Member";
 import Admin from "./Admin";
+import { ExclamationCircle } from "heroicons-react";
+import WorkspaceInviteModal from "./WorkspaceInviteModal";
 
 const WorkspaceSettingModal = (parameter) => {
+    console.log(parameter.workspace)
     const navigate = useNavigate();
     const LoggedIn = UserAuth();
     const [IsAdmin, setIsAdmin] = useState(false);
     const [IsOnlyAdmin, setIsOnlyAdmin] = useState(false);
     const [Members, setMembers] = useState([]);
-    const [link, setLink] = useState('');
     const [Admins, setAdmins] = useState([]);
     const [Visibility, setVisibility] = useState('');
+    const [ShowWarning, setShowWarning] = useState('');
+    const [InviteModal, setInviteModal] = useState(false);
+
+    const toggleInviteModal = () =>{
+        setInviteModal(!InviteModal);
+    }
 
     useEffect(() => {
         setMembers(parameter.workspace.data().members);
@@ -24,6 +32,9 @@ const WorkspaceSettingModal = (parameter) => {
             if(parameter.workspace.data().admins.length===1){
                 setIsOnlyAdmin(true);
             }
+        }else{
+            setIsAdmin(false);
+            setIsOnlyAdmin(false);
         }
     },[parameter.workspace])
 
@@ -61,26 +72,6 @@ const WorkspaceSettingModal = (parameter) => {
         })
     }
 
-
-    const makeLink = async ()=>{
-        setDoc(doc(db,'workspaceInvite',parameter.workspace.id),{
-            timestamp: serverTimestamp(),
-            workspaceID: parameter.workspace.id
-        })
-        setLink("localhost:3000/workspaceinvite/"+parameter.workspace.id)
-    }
-
-    const getLink =()=>{
-        const q = query(doc(db,'workspaceInvite',parameter.workspace.id));
-        getDoc(q).then((doc)=>{
-            if(doc.data()===undefined){
-                makeLink();
-            }else{
-                setLink("localhost:3000/workspaceinvite/"+doc.id)
-            }
-        })
-    }
-
     const demoteAdmin = (id) =>{
         updateDoc(doc(db,'workspace', parameter.workspace.id),{
             admins: arrayRemove(id)
@@ -93,9 +84,26 @@ const WorkspaceSettingModal = (parameter) => {
         });
     }
 
+    const applyDelete = () =>{
+        updateDoc(doc(db,'workspace', parameter.workspace.id),{
+            remove: [LoggedIn.user.uid]
+        });
+        Admins.forEach((Admin)=>{
+            if(!self(Admin)){
+                updateDoc(doc(db,'notifications',Admin),{
+                    delete:arrayUnion(parameter.workspace.id)
+                })
+            }
+        })
+    }
+
     const removeMember = (id)=>{
+        console.log(self(id))
         if(Members.length===1){
             deleteWorkspace();
+        }else if(self(id)&&IsOnlyAdmin && IsAdmin){
+            setShowWarning('Please Assign Admin Role to Another Member');
+            return;
         }else{
             updateDoc(doc(db,'workspace', parameter.workspace.id),{
                 members: arrayRemove(id),
@@ -103,7 +111,6 @@ const WorkspaceSettingModal = (parameter) => {
             });
         }
     }
-
 
     const self = (id) =>{
         if(id === LoggedIn.user.uid){
@@ -128,19 +135,22 @@ const WorkspaceSettingModal = (parameter) => {
                     <p className="text-2xl">Members</p>                     
                     {Admins.map((admin)=>{
                         return(
-                            <Admin IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} admin={admin} demoteAdmin={demoteAdmin} removeMember={removeMember}></Admin>
+                            <Admin key={admin} IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} admin={admin} demoteAdmin={demoteAdmin} removeMember={removeMember}></Admin>
                         );
                     })}
                     {Members.map((member)=>{
                          if(Admins.includes(member)){
                             return;
                         }
-                        return(<Member IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} member={member} promoteMember={promoteMember} removeMember={removeMember}></Member>);
+                        return(<Member key={member} IsOnlyAdmin={IsOnlyAdmin} IsAdmin={IsAdmin} self={self} member={member} promoteMember={promoteMember} removeMember={removeMember}></Member>);
                     })}
                     {IsAdmin && (
-                        <button onClick={getLink} className="h-10 pl-3 rounded-lg w-[18rem] bg-blue-500  hover:bg-blue-600 active:bg-blue-700 text-white">Generate Invite Link</button>
-                        )}
-                    <p>{link}</p>
+                        <button onClick={toggleInviteModal} className="h-10 pl-3 rounded-lg w-[18rem] bg-blue-500  hover:bg-blue-600 active:bg-blue-700 text-white">Invite Users to Workspace</button>
+                    )}
+
+                    {InviteModal && (
+                        <WorkspaceInviteModal toggle={toggleInviteModal} workspace ={parameter.workspace}></WorkspaceInviteModal>
+                    )}
 
                     {IsAdmin && (
                         <p className="text-2xl">Visibility</p>
@@ -153,12 +163,18 @@ const WorkspaceSettingModal = (parameter) => {
                     )}
 
                     {IsAdmin && (
-                        <button onClick={deleteWorkspace} className="w-[18rem] h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
+                        <button onClick={applyDelete} className="w-[18rem] h-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-500 hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
                             Delete Workspace
                         </button>
                     )}
+                    {ShowWarning!=='' && (
+                        <div className="w-fit absolute top-1 left-[50%] translate-x-[-50%] py-2 px-4 h-fit bg-red-500 rounded-lg flex flex-row items-center justify-center space-x-2">
+                            <ExclamationCircle className="fill-white"></ExclamationCircle>
+                            <p className="text-white text-sm">{ShowWarning}</p>
+                        </div>
+                    )}
                 </div>
-                <div className="w-[38rem] pb-5 sticky bottom-0 flex flex-row-reverse">
+                <div className="w-[38rem] pb-5 bottom-0 flex flex-row-reverse">
                     <button
                         onClick={parameter.toggle}
                         className="flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">

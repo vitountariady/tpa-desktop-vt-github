@@ -1,10 +1,14 @@
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc } from "firebase/firestore";
+import { useState } from "react";
 import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase.config";
+import WorkspaceInviteModal from "./WorkspaceInviteModal";
 
 const CreateWorkspaceModal = (parameter) => {
     const loggedIn = UserAuth();
     // console.log(loggedIn.user.uid);
+    const [openInvite, setopenInvite] = useState(false);
+    const [newWorkspace,setnewWorkspace] = useState({});
 
     const addWorkspace=(e)=>{
         e.preventDefault();
@@ -15,15 +19,23 @@ const CreateWorkspaceModal = (parameter) => {
                 WorkspaceName: workspacename,
                 members: [loggedIn.user.uid],
                 admins: [loggedIn.user.uid],
-                Favorite: []
+                Favorite: [],
+                remove: []
+            }).then((document)=>{
+                getDoc(doc(db,'workspace',document.id)).then((x)=>{
+                    setnewWorkspace(x);
+                    setopenInvite(true);
+                })
             }).catch((error)=>{
-        });
-        parameter.toggle();
+                console.log(error)
+            });
     }
-
 
     return ( 
         <div style={{background:'rgba(0,0,0,0.5)'}} className="z-20 fixed top-0 left-0 flex w-full min-h-full justify-center items-center">
+            {openInvite && (
+                <WorkspaceInviteModal toggle={parameter.toggle} workspace={newWorkspace}></WorkspaceInviteModal>
+            )}
             <div style={{height:"250px", width:"350px"}} className="flex-col text-center items-center rounded-lg bg-white">
                 <p className="text-2xl mt-5">Add Workspace</p>
                 <form className="mt-8 space-y-2" onSubmit={addWorkspace}>
@@ -41,7 +53,7 @@ const CreateWorkspaceModal = (parameter) => {
                     <div className="flex items-center pt-2 m-4">
                         <input type="checkbox" name="public" id="public"  className="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded" />
                         <label htmlFor="public" className="ml-2 block text-sm text-gray-900">
-                        Make Workspace Public
+                            Make Workspace Public
                         </label>
                     </div>
     

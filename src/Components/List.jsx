@@ -50,6 +50,8 @@ const List = (parameter) => {
                 <TrashIcon onClick={deleteList} className='ml-1 stroke-gray-600 fill-gray-600 '></TrashIcon>
             </div>
             {Cards.map((card)=>{
+                let name = card.data().CardName;
+                if(name.toLowerCase().includes(parameter.search.toLowerCase()))
                 return(
                     <Card card={card}></Card>
                 )

@@ -17,7 +17,6 @@ const RegisterPage = () => {
         let confpass = e.target.confirmpassword.value;
         let tnc = e.target.tnc.checked;
         let errorDiv = document.getElementById("errorDiv");
-        console.log(email + " " + password + " " + confpass + " " + tnc + " ");
         if(password !== confpass){
           ErrorMessage("Passwords must be the same!");
         }else if(tnc === false){
@@ -34,7 +33,16 @@ const RegisterPage = () => {
             setDoc(doc(db,'users',cred.user.uid),{
                 FirstName: firstname,
                 LastName: lastname,
+                email: email,
+                profilePicture: "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"
             })
+            setDoc(doc(db,'notifications',cred.user.uid),{
+              delete :  [],
+              boarddelete :  [],
+              invite : [],
+              boardinvite : [],
+              message : []
+          })
             navigate('/');
         }).catch((err)=>{
            ErrorMessage("Email already used to register an account");
@@ -46,10 +54,6 @@ const RegisterPage = () => {
         errorDiv.classList.remove("hidden");
         setError(message);
     }
-
-
-
-
 
     return (
         <>

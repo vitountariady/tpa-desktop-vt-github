@@ -8,8 +8,7 @@ const Member = (parameter) => {
         getDoc(doc(db,'users',parameter.member)).then((document)=>{
             setName(document.data().FirstName + ' '+ document.data().LastName)
         });
-    }, [parameter.member])
-    
+    }, [parameter])
 
     const member =parameter.member;
     return(

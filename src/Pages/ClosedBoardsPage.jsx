@@ -25,11 +25,15 @@ const ClosedBoardsPage = () => {
             <Navbar></Navbar>
             <div className="flex flex-row pt-16">
                 <div className="flex flex-row overflow-x-scroll">
+                    {Boards.length===0 && (
+                        <p className="text-xl absolute left-[50%] top-[50%]">Empty</p>
+                    )}
+                    
                     {Boards.map((curr)=>{
                         console.log(curr.data());
-                        // if(!curr.data().admins.includes(loggedIn.user.uid)){
-                        //     return;
-                        // }
+                        if(!curr.data().admins.includes(loggedIn.user.uid)){
+                            return;
+                        }
                         return(
                             <Board board={curr}></Board>
                         )

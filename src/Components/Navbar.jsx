@@ -1,11 +1,17 @@
-import { Fragment } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { Disclosure, Menu, Transition } from '@headlessui/react'
 import { getAuth } from 'firebase/auth';
-import { useNavigate } from 'react-router-dom';
+import { Link,useNavigate } from 'react-router-dom';
+import { BellIcon as BellIconSolid} from '@heroicons/react/solid';
+import { BellIcon as BellIconOutline } from '@heroicons/react/outline';
+import { doc, onSnapshot, query } from 'firebase/firestore';
+import { db } from '../firebase.config';
+import { UserAuth } from '../context/AuthContext';
+import NotificationsWindow from './notifications';
 
 const navigation = [
   { name: 'Home', href: '/home', current: false },
-  { name: 'Close Boards', href: '/closedboards', current: false },
+  { name: 'Closed Boards', href: '/closedboards', current: false },
   { name: 'Projects', href: '#', current: false },
   { name: 'Calendar', href: '#', current: false },
 ]
@@ -17,11 +23,49 @@ function classNames(...classes) {
 export default function Navbar() {
   const auth = getAuth();
   const navigate= useNavigate();
+  const [InviteNotifications, setInviteNotifications] = useState([]);
+  const [BoardInviteNotifications, setBoardInviteNotifications] = useState([]);
+  const [DeleteNotifications, setDeleteNotifications] = useState([]);
+  const [BoardDeleteNotifications, setBoardDeleteNotifications] = useState([]);
+  const [MessageNotifications, setMessageNotifications] = useState([]);
+  const [Notif, setNotif] = useState(false);
+  const [ShowNotifications, setShowNotifications] = useState(false);
+  const loggedIn = UserAuth();
+  
+
+  useEffect(() => {
+    if(loggedIn.user.uid === undefined){
+      return;
+    }
+    const q= query(doc(db,'notifications',loggedIn.user.uid));
+    onSnapshot(q,(document)=>{
+      if(document.data()===undefined){
+        return;
+      }
+      console.log(document.data())
+      if(document.data().delete.length > 0 || document.data().invite.length > 0 || document.data().message.length > 0 ||document.data().boarddelete.length>0 || document.data().boardinvite.length>0){
+        setDeleteNotifications(document.data().delete);
+        setBoardDeleteNotifications(document.data().boarddelete);
+        setInviteNotifications(document.data().invite);
+        setBoardInviteNotifications(document.data().boardinvite);
+        setMessageNotifications(document.data().message);
+        setNotif(true);
+      }else{
+        setNotif(false);
+        setShowNotifications(false);
+      }
+    })
+  }, [loggedIn])
+  
 
   function logout(){
     auth.signOut();
     navigate("/");
 }
+
+  const toggleNotifModal=()=>{
+    setShowNotifications(!ShowNotifications);
+  }
 
 
   return (
@@ -58,6 +102,15 @@ export default function Navbar() {
                   </div>
                 </div>
               </div>
+              {Notif && (
+                <BellIconSolid onClick={toggleNotifModal} className="fill-white w-6"></BellIconSolid>
+              )}
+              {!Notif && (
+                <BellIconOutline className="stroke-white w-6"></BellIconOutline>
+              )}
+              {ShowNotifications && (
+                <NotificationsWindow toggle = {toggleNotifModal} inviteNotifications={InviteNotifications} boardInviteNotifications={BoardInviteNotifications} deleteNotifications ={DeleteNotifications} boardDeleteNotifications={BoardDeleteNotifications} messageNotifications={MessageNotifications}></NotificationsWindow>
+              )}
               <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:static sm:inset-auto sm:ml-6 sm:pr-0">
                 {/* Profile dropdown */}
                 <Menu as="div" className="ml-3 relative">
@@ -66,7 +119,7 @@ export default function Navbar() {
                       <span className="sr-only">Open user menu</span>
                       <img
                         className="h-8 w-8 rounded-full"
-                        src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
+                        src={loggedIn.userData.profilePicture}
                         alt=""
                       />
                     </Menu.Button>
@@ -83,20 +136,13 @@ export default function Navbar() {
                     <Menu.Items className="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
                       <Menu.Item>
                         {({ active }) => (
-                          <p
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Your Profile
-                          </p>
-                        )}
-                      </Menu.Item>
-                      <Menu.Item>
-                        {({ active }) => (
-                          <p
-                            className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
-                          >
-                            Settings
-                          </p>
+                          <Link to={'/setting'}>
+                            <p
+                              className={classNames(active ? 'bg-gray-100' : '', 'block px-4 py-2 text-sm text-gray-700')}
+                            >
+                              Settings
+                            </p>
+                          </Link>
                         )}
                       </Menu.Item>
                       <Menu.Item>

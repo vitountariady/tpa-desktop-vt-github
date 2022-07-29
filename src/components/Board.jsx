@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase.config";
 import BoardSetting from "./BoardSettingModal";
+import ClosedBoardSetting from "./ClosedBoardSettingModal";
 
 const Board = (parameter) => {
     const [IsMember, setIsMember] = useState(false);
@@ -17,7 +18,7 @@ const Board = (parameter) => {
         if(parameter.board.data().members.includes(loggedIn.user.uid)){
             setIsMember(true);
         }
-    }, [parameter.board])
+    }, [parameter.board.data()])
 
     const toggleModal = () =>{
         setModal(!Modal);
@@ -90,7 +91,8 @@ const Board = (parameter) => {
                         )}
                     </div>
                 </div>
-                {Modal && <BoardSetting toggle={toggleModal} board= {parameter.board}></BoardSetting>}
+                {(Modal && parameter.board.data().Open) && <BoardSetting toggle={toggleModal} board= {parameter.board}></BoardSetting>}
+                {(Modal && !parameter.board.data().Open) && <ClosedBoardSetting toggle={toggleModal} board= {parameter.board}></ClosedBoardSetting>}
         </div>
     );
 }
