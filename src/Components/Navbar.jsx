@@ -12,8 +12,6 @@ import NotificationsWindow from './notifications';
 const navigation = [
   { name: 'Home', href: '/home', current: false },
   { name: 'Closed Boards', href: '/closedboards', current: false },
-  { name: 'Projects', href: '#', current: false },
-  { name: 'Calendar', href: '#', current: false },
 ]
 
 function classNames(...classes) {

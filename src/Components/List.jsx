@@ -11,7 +11,7 @@ const List = (parameter) => {
 
     useEffect(() => {
         getCards();
-    }, [parameter])
+    }, [parameter.list])
     
     const getCards = () =>{
         const q  = query(collection(db,'card'),where('ListID','==',parameter.list.id));
@@ -24,7 +24,9 @@ const List = (parameter) => {
         addDoc(collection(db,'card'),{
             CardDescription:'',
             CardName: 'New Card',
-            ListID : parameter.list.id
+            ListID : parameter.list.id,
+            labels:[],
+            duedate:'',
         })
     }
 
@@ -53,7 +55,7 @@ const List = (parameter) => {
                 let name = card.data().CardName;
                 if(name.toLowerCase().includes(parameter.search.toLowerCase()))
                 return(
-                    <Card card={card}></Card>
+                    <Card key={card.id} card={card}></Card>
                 )
             })}
             <div className='m-2 bg-neutral-300 hover:bg-neutral-200 active:bg-neutral-400 w-10 h-10 rounded-full flex flex-col justify-center items-center'>

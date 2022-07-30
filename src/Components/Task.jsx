@@ -1,7 +1,16 @@
 import { deleteDoc, doc, updateDoc } from "firebase/firestore";
+import { useEffect, useState } from "react";
 import { db } from "../firebase.config";
 
 const Task = (parameter) => {
+
+    const [taskData, settaskData] = useState({});
+
+    useEffect(() => {
+      settaskData(parameter.task.data())
+    }, [parameter.task])
+    
+
     const changeTaskName = (e) =>{
         if(e.key === 'Enter'){
             if(e.target.value===''){
@@ -26,10 +35,10 @@ const Task = (parameter) => {
     return (
         <div className=" h-10 flex flex-row justify-between p-2 rounded-lg bg-gray-700">
             <div className="flex flex-row">
-                <input onKeyDown={(e)=>{changeTaskName(e)}} className="rounded-l-md px-2 w-40" type="text" defaultValue={parameter.task.data().taskName}/>
+                <input onKeyDown={(e)=>{changeTaskName(e)}} className="rounded-l-md px-2 w-40" type="text" defaultValue={taskData.taskName}/>
                 <button onClick={deleteTask} className="items-center jusitfy-center flex text-sm p-2 rounded-r-md bg-red-500 hover:bg-red-400 active:bg-red-600 text-white">Delete</button>
             </div>
-            <input onClick={changeDone} className="w-4" type="checkbox" defaultChecked={parameter.task.data().done}/>
+            <input onClick={changeDone} className="w-4" type="checkbox" defaultChecked={taskData.done}/>
         </div>
     );
 }

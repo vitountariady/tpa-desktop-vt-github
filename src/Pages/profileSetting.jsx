@@ -4,14 +4,14 @@ import { updateEmail, updatePassword, updateProfile } from "firebase/auth";
 import { doc, updateDoc } from "firebase/firestore";
 import { getDownloadURL, getStorage,ref, uploadBytes } from "firebase/storage";
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../Components/Navbar";
 import { UserAuth } from "../context/AuthContext";
 import { db,storage } from "../firebase.config";
 
 const ProfileSettingPage = () => {
     const loggedIn = UserAuth();
-
-    console.log(loggedIn.userData.profilePicture);
+    const navigate = useNavigate();
 
     const saveImageURL = (x) =>{
         updateDoc(doc(db,'users',loggedIn.user.uid),{
@@ -38,6 +38,7 @@ const ProfileSettingPage = () => {
     }
 
     const handleChangeFirstName =(e)=>{
+        e.preventDefault()
         if(e.key === 'Enter'){
             if(e.target.value===''){
                 return;
@@ -47,8 +48,9 @@ const ProfileSettingPage = () => {
             });
         }
     }
-
+    
     const handleChangeLastName =(e)=>{
+        e.preventDefault()
         if(e.key === 'Enter'){
             if(e.target.value===''){
                 return;
@@ -58,7 +60,7 @@ const ProfileSettingPage = () => {
             });
         }
     }
-    
+
     return (
         <div>
             <Navbar></Navbar>

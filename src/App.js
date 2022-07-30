@@ -12,6 +12,7 @@ import BoardPage from "./Pages/boardPage";
 import { useEffect } from "react";
 import { NotifContextProvider } from "./context/NotifContext";
 import ProfileSettingPage from "./Pages/profileSetting";
+import Calendar from "./Components/Calendar";
 
 export default function App() {
   useEffect(() => {
@@ -31,6 +32,7 @@ export default function App() {
             <Route exact path="/closedboards" element={<ClosedBoardsPage></ClosedBoardsPage>}/>
             <Route exact path="/board/:boardid" element={<BoardPage></BoardPage>}/>
             <Route exact path="/setting" element={<ProfileSettingPage></ProfileSettingPage>}/>
+            <Route exact path="/Calendar/:boardid" element={<Calendar></Calendar>}/>
         </Routes>
       </NotifContextProvider>
     </AuthContextProvider>

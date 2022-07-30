@@ -32,7 +32,7 @@ const Comments = (parameter) => {
                 <input type="text" id="comment" className="w-[80%] p-1 border-black border-2 rounded-l-md" />
                 <button onClick={AddComment} className="w-[20%] text-xs p-2 bg-green-500 hover:bg-green-400 active:bg-green-600 text-white rounded-r-md">Add Comment</button>
             </div>
-            <div className="w-full h-[15rem] flex flex-col overflow-y-scroll">
+            <div className="w-full h-[7rem] flex flex-col overflow-y-auto">
                 {Comments.length===0 && (
                     <div className="w-full border-2 h-[7rem] flex justify-center items-center">
                         <p className="text-xl font-thin">Empty</p>

@@ -1,5 +1,5 @@
 import Sidebar from "../Components/Sidebar"
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 import { PlusIcon as PlusIconSolid } from '@heroicons/react/solid'
 import { useState } from "react";
 import { addDoc, collection, doc, getDocs, onSnapshot, query, updateDoc, where } from "firebase/firestore";
@@ -60,7 +60,10 @@ const BoardPage = () => {
     return ( 
         <div>
             <Navbar></Navbar>
-            <p className="mt-24 ml-6 text-3xl font-semibold text-black">{Board.BoardName}</p>
+            <div className="mt-24 ml-6 flex flex-row w-fit space-x-5">
+                <p className="text-3xl font-semibold text-black">{Board.BoardName}</p>
+                <Link to={`/Calendar/${params.boardid}`} className="w-30 h-fit bg-blue-500 hover:bg-blue-400 active:bg-blue-600 items-center p-2 rounded-lg text-white">Calendar View</Link>
+            </div>
             <p className="mt-2 ml-6 w-fit p-2 rounded-xl text-white text-md font-semibold bg-neutral-500">Board</p>
             <input onChange={onSearchBarChange} id="searchBar" type="text" placeholder="Search" className="m-6 border-black border-2 rounded-lg p-1 w-96" />
             <div className="flex flex-row">
@@ -76,7 +79,7 @@ const BoardPage = () => {
                         listContainsSearchedCard(list.id);
                         if(name.toLowerCase().includes(Search.toLowerCase()) || Found === true){
                             return(
-                                <List search={Search} list={list}></List>
+                                <List key={list.id} search={Search} list={list}></List>
                             )
                         }
                     })}

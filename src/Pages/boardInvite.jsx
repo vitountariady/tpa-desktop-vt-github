@@ -5,12 +5,13 @@ import { UserAuth } from "../context/AuthContext";
 import { db } from "../firebase.config";
 
 const BoardInvite = () => {
-    const params = useParams();
     const LoggedIn = UserAuth();
+    const params = useParams();
     const [Board, setBoard] = useState({});
     const [isExpired, setisExpired] = useState(false);
+    const [alreadyMember, setalreadyMember] = useState(false);
     const navigate = useNavigate();
-
+    
     useEffect(() => {
         getInvitation();
         getBoard();
@@ -37,7 +38,7 @@ const BoardInvite = () => {
         updateDoc(doc(db,'board',params.boardid),{
             members: arrayUnion(LoggedIn.user.uid)
         });
-        Board.data().members.forEach(member => {
+        Board.members.forEach(member => {
             console.log(member);
             console.log(LoggedIn.userData.FirstName + " " + LoggedIn.userData.LastName + " is now a member of " + Board.BoardName + " (Board)");
             updateDoc(doc(db,'notifications',member),{
@@ -52,12 +53,19 @@ const BoardInvite = () => {
         const q = doc(db,'board', params.boardid);
         getDoc(q).then((document)=>{
             setBoard(document.data());
+            console.log(document.data().members);
+            console.log(LoggedIn.user.uid);
+            console.log(document.data().members.includes(LoggedIn.user.uid));
+            if(document.data().members.includes(LoggedIn.user.uid)){
+                console.log("tests")
+                setalreadyMember(true);
+            }
         })
     }
 
     return ( 
         <div className="w-screen h-screen bg-blue-200 flex items-center justify-center">
-            {!isExpired && (
+            {(!isExpired && !alreadyMember)&& (
                 <div className="w-[30rem] h-[20rem] bg-white rounded-lg flex flex-col p-5 items-center justify-center">
                     <div className="mt-5 w-full">
                         <p className="text-xl text-center font-bold">You have been invited to join {Board.BoardName}</p>
@@ -65,6 +73,16 @@ const BoardInvite = () => {
                     <button onClick={acceptInvitation} className="mt-5 p-3 bg-blue-200 rounded-lg text-black hover:bg-blue-300 active:bg-blue-500 active:text-white">Join Board</button>
             </div>
             )}
+
+            {alreadyMember && (
+                <div className="w-[30rem] h-[20rem] bg-white rounded-lg flex flex-col p-5 items-center justify-center">
+                    <div className="mt-5 w-full">
+                        <p className="text-xl text-center font-bold">User is already a member</p>
+                    </div>
+                    <button onClick={returnToHome} className="mt-5 p-3 bg-blue-200 rounded-lg text-black hover:bg-blue-300 active:bg-blue-500 active:text-white">Return to Homepage</button>
+                </div>
+            )}
+
             {isExpired && (
                 <div className="w-[30rem] h-[20rem] bg-white rounded-lg flex flex-col p-5 items-center justify-center">
                     <div className="mt-5 w-full">
