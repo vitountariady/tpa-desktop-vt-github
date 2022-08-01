@@ -53,10 +53,11 @@ const List = (parameter) => {
             </div>
             {Cards.map((card)=>{
                 let name = card.data().CardName;
-                if(name.toLowerCase().includes(parameter.search.toLowerCase()))
-                return(
-                    <Card key={card.id} card={card}></Card>
-                )
+                if(name.toLowerCase().includes(parameter.search.toLowerCase()) || parameter.found===true){
+                    return(
+                        <Card key={card.id} card={card}></Card>
+                    )
+                }
             })}
             <div className='m-2 bg-neutral-300 hover:bg-neutral-200 active:bg-neutral-400 w-10 h-10 rounded-full flex flex-col justify-center items-center'>
                 <div onClick={addCard} id='lingkaran' className='h-6 w-6 border-2 border-black p2 rounded-full flex justify-center items-center'>

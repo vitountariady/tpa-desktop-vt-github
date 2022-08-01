@@ -6,11 +6,12 @@ const isDev = require('electron-is-dev');
 function createWindow() {
   // Create the browser window.
   const win = new BrowserWindow({
-    width: 800,
-    height: 600,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       nodeIntegration: true,
     },
+    icon: './pasfotovito.png'
   });
 
   // and load the index.html of the app.
@@ -25,6 +26,17 @@ function createWindow() {
     win.webContents.openDevTools({ mode: 'detach' });
   }
 }
+
+app.setUserTasks([
+  {
+    program: process.execPath,
+    arguments:'--new window',
+    iconPath: process.execPath,
+    iconIndex:0,
+    title: 'New Window',
+    description: 'Create a new Window'
+  }
+])
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

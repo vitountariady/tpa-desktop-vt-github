@@ -43,8 +43,6 @@ const Checklist = (parameter) => {
         onSnapshot(q,(snap)=>{
             let totalTask = Tasks.length;
             let done = snap.docs.length;
-            // console.log(Math.ceil((done/totalTask)*100))
-            // console.log(Math.floor(100-((done/totalTask)*100)))
             setProgress(Math.ceil((done/totalTask)*100));
             setNotDone(Math.floor(100-((done/totalTask)*100)));
         })
@@ -59,8 +57,8 @@ const Checklist = (parameter) => {
                 </div>
             </div>
             <div className="w-full m-1 h-5 flex flex-row items-center justify-start">
-                <div style={{width: Progress*2}} className="h-full bg-yellow-400"></div>
-                <div style={{width: NotDone*2}} className="h-full bg-white"></div>
+                <div style={{width: Progress*2}} className="h-2 bg-yellow-400"></div>
+                <div style={{width: NotDone*2}} className="h-2 bg-white"></div>
             </div>
             {Tasks.map((task)=>{
                 return(

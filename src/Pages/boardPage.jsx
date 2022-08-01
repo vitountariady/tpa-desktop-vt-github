@@ -7,7 +7,6 @@ import { db } from "../firebase.config";
 import { useEffect } from "react";
 import List from "../Components/List";
 import Navbar from "../Components/Navbar";
-import { async } from "@firebase/util";
 
 const BoardPage = () => {
     const params = useParams();
@@ -28,26 +27,31 @@ const BoardPage = () => {
         setSearch(search);
     }
 
-    const listContainsSearchedCard = (listid) =>{
-        const q  = query(collection(db,'card'),where('ListID','==',listid));
-        getDocs(q).then((documents)=>{
-            documents.forEach((document)=>{
-                let cardname = document.data().CardName;
-                if(cardname.toLowerCase().includes(Search.toLowerCase())){
-                    setFound(true);
-                    return;
-                }else{
-                    setFound(false);
-                }
-            })
-        })
-    }
+    // const listContainsSearchedCard = async(listid) =>{
+    //     const q  = query(collection(db,'card'),where('ListID','==',listid));
+    //     const documents = await getDocs(q);
+    //     let found = false
+    //     documents.forEach((document)=>{
+    //         let cardname = document.data().CardName;
+    //         if(cardname.toLowerCase().includes(Search.toLowerCase())){
+    //             found =true;
+    //         }
+    //     })
+    //     return new Promise((resolve) => {
+    //         if(found===true){
+    //             resolve(true)
+    //         }else{
+    //             resolve(false)
+    //         }
+    //     })
+    // }
 
     useEffect(() => {
         getLists();
-    }, [params])
+    }, [Search])
 
     const getLists = () =>{
+        console.log('test');
         onSnapshot(doc(db,'board',params.boardid),(snap)=>{
             setBoard(snap.data());
         })
@@ -76,10 +80,12 @@ const BoardPage = () => {
                     </div>
                     {Lists.map((list)=>{
                         let name = list.data().ListName
-                        listContainsSearchedCard(list.id);
-                        if(name.toLowerCase().includes(Search.toLowerCase()) || Found === true){
+                        // listContainsSearchedCard(list.id).then((res)=>{
+                        //     setFound(res);
+                        // })
+                        if(name.toLowerCase().includes(Search.toLowerCase())){
                             return(
-                                <List key={list.id} search={Search} list={list}></List>
+                                <List key={list.id} search={Search} list={list} found={name.toLowerCase().includes(Search.toLowerCase())}></List>
                             )
                         }
                     })}

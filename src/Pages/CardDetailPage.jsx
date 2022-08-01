@@ -7,6 +7,8 @@ import Checklist from "../Components/Checklist";
 import Comments from "../Components/Comments";
 import ManageLabel from "../Components/ManageLabelModal";
 import Label from "../Components/Label";
+import CardAttachment from "../Components/CardAttachment";
+import CardLocation from "../Components/CardLocation";
 const CardDetail = (parameter) => {
     const modules ={
         toolbar: [["bold", "italic", "underline", "strike"]]
@@ -23,7 +25,7 @@ const CardDetail = (parameter) => {
                 parameter.card.data().CardDescription
             )
         }
-    })
+    },[quill])
 
     const addChecklist = () =>{
         addDoc(collection(db, 'card',parameter.card.id,'checklist'),{
@@ -43,11 +45,11 @@ const CardDetail = (parameter) => {
         onSnapshot(q,(snap)=>{
             setChecklists(snap.docs);
         })
-    },[parameter])
+    },[])
 
     useEffect (()=>{
         document.getElementById("duedate").value = parameter.card.data().duedate
-    },[parameter])
+    },[])
 
     useEffect(()=>{
         const q = query(collection(db,'labels'));
@@ -72,7 +74,7 @@ const CardDetail = (parameter) => {
                 }
             })
         }
-    })
+    },[quill])
 
     const toggleLabelModal = () =>{
         setLabelModal(!LabelModal);
@@ -117,6 +119,10 @@ const CardDetail = (parameter) => {
                     <button onClick={addDueDate} className="bg-blue-500 hover:bg-blue-400 active:bg-blue-600 items-center p-2 rounded-r-md text-white">Set Due Date</button>
                 </div>
                 
+                <p className="pt-10 text-xl font-semibold">Attachment</p>
+                <CardAttachment card={parameter.card}></CardAttachment>
+
+                <CardLocation card={parameter.card}></CardLocation>
 
                 <div className="w-[36rem] pb-5 bottom-0 flex flex-row-reverse">
                 <button
